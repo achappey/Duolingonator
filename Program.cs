@@ -53,6 +53,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<DuolingoService>();
 builder.Services.AddScoped<DuolingoClient>();
 builder.Services.AddAutoMapper(typeof(DuolingoProfile));
+builder.Services.AddMemoryCache();
 
 builder.Services.AddControllers()
     .AddOData(opt => opt.AddRouteComponents(odataEndpoint, GetGraphModel("Duolingo"))

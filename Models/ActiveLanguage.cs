@@ -1,9 +1,7 @@
 
-using System.Text.Json.Serialization;
-
 namespace Duolingonator.Models;
 
-public class LanguageData
+public class ActiveLanguage
 {
     public IEnumerable<Skill> Skills { get; set; } = null!;
 

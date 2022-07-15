@@ -19,7 +19,5 @@ export const Header: React.FunctionComponent = () => {
         <StackItem grow={1}>
             <Breadcrumb items={items} />
         </StackItem>
-        <StackItem align="end">
-        </StackItem>
     </Stack>
 }

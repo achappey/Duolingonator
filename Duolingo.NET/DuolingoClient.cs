@@ -7,8 +7,6 @@ public class DuolingoClient
 {
     private readonly HttpClient _httpClient = null!;
 
-    private static Dictionary<string, User> _cache = new Dictionary<string, User>();
-
     private const string BaseAddress = "https://www.duolingo.com/";
 
     public DuolingoClient(HttpClient httpClient)
@@ -46,21 +44,11 @@ public class DuolingoClient
 
     public async Task<User?> GetUser(string username, string password)
     {
-        if (_cache.ContainsKey(username))
-        {
-            return _cache[username];
-        }
-
         var loginData = await Login(username, password);
 
         if (loginData != null && !string.IsNullOrEmpty(loginData.Username))
         {
             var user = await GetUserData(loginData);
-
-            if (user != null)
-            {
-                _cache.Add(username, user);
-            }
 
             return user;
         }

@@ -8,21 +8,22 @@ namespace Duolingonator.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class LanguageDataController : ControllerBase
+public class ActiveLanguageController : ControllerBase
 {
-    private readonly ILogger<LanguageDataController> _logger;
+    private readonly ILogger<ActiveLanguageController> _logger;
 
     private readonly DuolingoService _duolingoService;
 
-    public LanguageDataController(ILogger<LanguageDataController> logger, DuolingoService duolingoService)
+    public ActiveLanguageController(ILogger<ActiveLanguageController> logger, DuolingoService duolingoService)
     {
         _logger = logger;
         _duolingoService = duolingoService;
     }
 
-    [HttpGet(Name = "GetLanguageData")]
+    [HttpGet(Name = "GetActiveLanguage")]
+    [Tags("Languages")]
     [EnableQuery]
-    public async Task<LanguageData> Get()
+    public async Task<ActiveLanguage> Get()
     {
         var user = this.HttpContext.GetUser();
 
