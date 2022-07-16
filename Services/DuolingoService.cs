@@ -11,6 +11,8 @@ public class DuolingoService
     private readonly IMapper _mapper;
     private readonly IMemoryCache _memoryCache;
 
+    private static HashSet<string> RunningRequests = new HashSet<string>();
+
     public DuolingoService(
         DuolingoClient client, IMapper mapper, IMemoryCache memoryCache)
     {
@@ -28,7 +30,7 @@ public class DuolingoService
             .Select(t => this._mapper.Map<Language>(t));
     }
 
-    public async Task<ActiveLanguage> GetLanguageData(string username, string password)
+    public async Task<ActiveLanguage> GetActiveLanguage(string username, string password)
     {
         var user = await this.GetUser(username, password);
 
@@ -37,24 +39,46 @@ public class DuolingoService
         : throw new Exception();
     }
 
+    private void WaitForRunningRequest(string username)
+    {
+        while (RunningRequests.Contains(username))
+            Thread.Sleep(1000);
+    }
+
     private async Task<Duolingo.NET.Models.User> GetUser(string username, string password)
     {
-        if (!_memoryCache.TryGetValue(username, out Duolingo.NET.Models.User cacheValue))
+        WaitForRunningRequest(username);
+
+        RunningRequests.Add(username);
+
+        try
         {
-            var user = await this._client.GetUser(username, password);
+            if (!_memoryCache.TryGetValue(username, out Duolingo.NET.Models.User cacheValue))
+            {
+                var user = await this._client.GetUser(username, password);
 
-            cacheValue = user != null ? user : throw new Exception();
+                cacheValue = user != null ? user : throw new Exception();
 
-            var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromSeconds(900));
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(900));
 
-            _memoryCache.Set(username, cacheValue, cacheEntryOptions);
+                _memoryCache.Set(username, cacheValue, cacheEntryOptions);
 
-            return cacheValue;
+                return cacheValue;
+            }
+            else
+            {
+                return cacheValue;
+            }
         }
-        else
+        catch (Exception)
         {
-            return cacheValue;
+            throw;
         }
+        finally
+        {
+            RunningRequests.Remove(username);
+        }
+
     }
 }

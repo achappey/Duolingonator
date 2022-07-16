@@ -1,5 +1,4 @@
 ﻿using Duolingo.NET.Models;
-using System.Text.Json;
 
 namespace Duolingo.NET;
 
@@ -17,29 +16,22 @@ public class DuolingoClient
 
     private async Task<User?> GetUserData(Login loginData)
     {
-        var userData = await _httpClient.GetAsync(string.Format("/users/{0}", loginData.Username));
-
-        userData.EnsureSuccessStatusCode();
-
-        var json = await userData.Content.ReadAsStringAsync();
-
-        return JsonSerializer.Deserialize<User>(json);
+        return await _httpClient.GetFromJsonAsync<User>(
+            string.Format("/users/{0}", loginData.Username));
     }
 
     private async Task<Login?> Login(string username, string password)
     {
-        var homePage = await _httpClient.GetAsync("/");
-
-        homePage.EnsureSuccessStatusCode();
-
-        var jsonString = string.Format(@"{{""login"":""{0}"",""password"":""{1}""}}", username, password);
-        var loginResult = await _httpClient.PostAsync("/login", new StringContent(jsonString, System.Text.Encoding.UTF8, "application/json"));
+        var loginResult = await _httpClient.PostAsJsonAsync<DuolingoAuth>("/login",
+        new DuolingoAuth()
+        {
+            Login = username,
+            Password = password
+        });
 
         loginResult.EnsureSuccessStatusCode();
 
-        var data = await loginResult.Content.ReadAsStringAsync();
-
-        return JsonSerializer.Deserialize<Login>(data);
+        return await loginResult.Content.ReadFromJsonAsync<Login>();
     }
 
     public async Task<User?> GetUser(string username, string password)
@@ -48,12 +40,16 @@ public class DuolingoClient
 
         if (loginData != null && !string.IsNullOrEmpty(loginData.Username))
         {
-            var user = await GetUserData(loginData);
-
-            return user;
+            return await GetUserData(loginData);
         }
 
-        return null;
+        throw new NotSupportedException();
     }
+}
 
+public class DuolingoAuth
+{
+    public string Login { get; set; } = null!;
+    
+    public string Password { get; set; } = null!;
 }

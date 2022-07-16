@@ -27,6 +27,6 @@ public class ActiveLanguageController : ControllerBase
     {
         var user = this.HttpContext.GetUser();
 
-        return await _duolingoService.GetLanguageData(user.Username, user.Password);
+        return await _duolingoService.GetActiveLanguage(user.Username, user.Password);
     }
 }
