@@ -8,10 +8,12 @@ namespace Duolingonator.Services;
 public class DuolingoService
 {
     private readonly DuolingoClient _client;
+    
     private readonly IMapper _mapper;
+
     private readonly IMemoryCache _memoryCache;
 
-    private static HashSet<string> RunningRequests = new HashSet<string>();
+    private static bool RequestRunning = false;
 
     public DuolingoService(
         DuolingoClient client, IMapper mapper, IMemoryCache memoryCache)
@@ -41,15 +43,14 @@ public class DuolingoService
 
     private void WaitForRunningRequest(string username)
     {
-        while (RunningRequests.Contains(username))
+        while (RequestRunning)
             Thread.Sleep(1000);
     }
 
     private async Task<Duolingo.NET.Models.User> GetUser(string username, string password)
     {
         WaitForRunningRequest(username);
-
-        RunningRequests.Add(username);
+        RequestRunning = true;
 
         try
         {
@@ -77,8 +78,7 @@ public class DuolingoService
         }
         finally
         {
-            RunningRequests.Remove(username);
+            RequestRunning = false;
         }
-
     }
 }

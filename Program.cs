@@ -50,8 +50,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<DuolingoService>();
-builder.Services.AddScoped<DuolingoClient>();
+builder.Services.AddSingleton<DuolingoService>();
+builder.Services.AddSingleton<DuolingoClient>();
 builder.Services.AddAutoMapper(typeof(DuolingoProfile));
 builder.Services.AddMemoryCache();
 
