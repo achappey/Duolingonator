@@ -13,6 +13,6 @@ public class Skill
 
     public string Name { get; set; } = null!;
 
-    public string Explanation { get; set; } = null!;
+    public string? Explanation { get; set; }
 
 }
