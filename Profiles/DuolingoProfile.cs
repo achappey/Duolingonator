@@ -14,7 +14,7 @@ public class DuolingoProfile : AutoMapper.Profile
             .ForMember(a => a.DateTime, g => g.MapFrom(a => DateTimeOffset.FromUnixTimeMilliseconds(a.DateTime)));
 
         CreateMap<Duolingo.NET.Models.User, Profile>()
-            .ForMember(a => a.CreatedAt, g => g.MapFrom(a => DateTime.Parse(a.CreationDate)))
+            .ForMember(a => a.CreatedAt, g => g.MapFrom(a => DateTimeOffset.FromUnixTimeMilliseconds(a.CreatedDate)))
             .ForMember(a => a.Followers, g => g.MapFrom(a => a.TrackingProperties.NumFollowers))
             .ForMember(a => a.Streak, g => g.MapFrom(a => a.SiteStreak));
 

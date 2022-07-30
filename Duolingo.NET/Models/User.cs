@@ -8,8 +8,14 @@ public class User
     [JsonPropertyName("username")]
     public string Username { get; set; } = null!;
 
-    [JsonPropertyName("creation_date")]
-    public string CreationDate { get; set; } = null!;
+    [JsonPropertyName("created_dt")]
+    public long CreatedDate { get; set; }
+
+    [JsonPropertyName("bio")]
+    public string? Bio { get; set; }
+
+    [JsonPropertyName("learning_language")]
+    public string LearningLanguage { get; set; } = null!;
 
     [JsonPropertyName("site_streak")]
     public int SiteStreak { get; set; }
