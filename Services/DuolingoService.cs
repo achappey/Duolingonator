@@ -1,5 +1,4 @@
 using Duolingo.NET;
-using AutoMapper;
 using Duolingonator.Models;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -8,19 +7,26 @@ namespace Duolingonator.Services;
 public class DuolingoService
 {
     private readonly DuolingoClient _client;
-    
-    private readonly IMapper _mapper;
+
+    private readonly AutoMapper.IMapper _mapper;
 
     private readonly IMemoryCache _memoryCache;
 
     private static bool RequestRunning = false;
 
     public DuolingoService(
-        DuolingoClient client, IMapper mapper, IMemoryCache memoryCache)
+        DuolingoClient client, AutoMapper.IMapper mapper, IMemoryCache memoryCache)
     {
         _client = client;
         _mapper = mapper;
         _memoryCache = memoryCache;
+    }
+
+    public async Task<Profile> GetProfile(string username, string password)
+    {
+        var user = await this.GetUser(username, password);
+
+        return this._mapper.Map<Profile>(user);
     }
 
     public async Task<IEnumerable<Language>> GetLanguages(string username, string password)
