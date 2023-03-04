@@ -8,7 +8,7 @@ export const Home: React.FunctionComponent = () => {
 
       <h4>Authentication</h4>
       <p>Add as query string or in the request header:</p>
-      <code>x-api-key: base64Encode([DuolingoUsername]:[DuolingoPassword])</code>
+      <code>x-api-key: base64Encode([DuolingoUsername]:[DuolingoJwtToken])</code>
       <p>
         Calculate your API Key <Link href={"/access"}>here</Link>.
       </p>

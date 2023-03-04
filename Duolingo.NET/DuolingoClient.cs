@@ -12,44 +12,26 @@ public class DuolingoClient
     {
         httpClient.BaseAddress = new Uri(BaseAddress);
         _httpClient = httpClient;
+
     }
 
-    private async Task<User?> GetUserData(Login loginData)
+    private async Task<User?> GetUserData(string username, string jwt)
     {
+        _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + jwt);
+
         return await _httpClient.GetFromJsonAsync<User>(
-            string.Format("/users/{0}", loginData.Username));
-    }
-
-    private async Task<Login?> Login(string username, string password)
-    {
-        var loginResult = await _httpClient.PostAsJsonAsync<DuolingoAuth>("/login",
-        new DuolingoAuth()
-        {
-            Login = username,
-            Password = password
-        });
-
-        loginResult.EnsureSuccessStatusCode();
-
-        return await loginResult.Content.ReadFromJsonAsync<Login>();
+            string.Format("/users/{0}", username));
     }
 
     public async Task<User?> GetUser(string username, string password)
     {
-        var loginData = await Login(username, password);
-
-        if (loginData != null && !string.IsNullOrEmpty(loginData.Username))
-        {
-            return await GetUserData(loginData);
-        }
-
-        throw new NotSupportedException();
+        return await GetUserData(username, password);
     }
 }
 
 public class DuolingoAuth
 {
     public string Login { get; set; } = null!;
-    
+
     public string Password { get; set; } = null!;
 }

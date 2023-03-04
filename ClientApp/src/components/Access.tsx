@@ -38,7 +38,7 @@ export const Access: React.FunctionComponent = () => {
                     value={password}
                     canRevealPassword
                     onChange={(_e, newValue) => updatePassword(newValue)}
-                    label="Duolingo password" />
+                    label="Duolingo JWT token" />
             </form>
             <br />
             <TextField value={decoded}
