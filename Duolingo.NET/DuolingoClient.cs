@@ -1,4 +1,5 @@
-﻿using Duolingo.NET.Models;
+﻿using System.Net.Http.Headers;
+using Duolingo.NET.Models;
 
 namespace Duolingo.NET;
 
@@ -17,10 +18,16 @@ public class DuolingoClient
 
     private async Task<User?> GetUserData(string username, string jwt)
     {
-        _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + jwt);
 
-        return await _httpClient.GetFromJsonAsync<User>(
-            string.Format("/users/{0}", username));
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/users/{username}");
+        requestMessage.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", jwt);
+
+        using var response = await _httpClient.SendAsync(requestMessage).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        using var content = response.Content;
+        return await content.ReadFromJsonAsync<User>().ConfigureAwait(false);
     }
 
     public async Task<User?> GetUser(string username, string password)

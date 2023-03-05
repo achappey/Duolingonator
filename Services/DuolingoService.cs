@@ -24,14 +24,14 @@ public class DuolingoService
 
     public async Task<Profile> GetProfile(string username, string password)
     {
-        var user = await this.GetUser(username, password);
+        var user = await this.GetUserAsync(username, password).ConfigureAwait(false);
 
         return this._mapper.Map<Profile>(user);
     }
 
     public async Task<IEnumerable<Language>> GetLanguages(string username, string password)
     {
-        var user = await this.GetUser(username, password);
+        var user = await this.GetUserAsync(username, password).ConfigureAwait(false);
 
         return user.Languages
             .Where(t => t.Points > 0)
@@ -40,43 +40,35 @@ public class DuolingoService
 
     public async Task<ActiveLanguage> GetActiveLanguage(string username, string password)
     {
-        var user = await this.GetUser(username, password);
+        var user = await this.GetUserAsync(username, password);
 
         return user != null && user.LanguageData.Count() > 0 ?
         this._mapper.Map<ActiveLanguage>(user.LanguageData.FirstOrDefault().Value)
         : throw new Exception();
+
     }
 
-    private void WaitForRunningRequest(string username)
+    private async Task<Duolingo.NET.Models.User> GetUserAsync(string username, string password)
     {
-        while (RequestRunning)
-            Thread.Sleep(1000);
-    }
-
-    private async Task<Duolingo.NET.Models.User> GetUser(string username, string password)
-    {
-        WaitForRunningRequest(username);
+        await WaitForRunningRequestAsync(username).ConfigureAwait(false);
         RequestRunning = true;
 
         try
         {
-            if (!_memoryCache.TryGetValue(username, out Duolingo.NET.Models.User cacheValue))
-            {
-                var user = await this._client.GetUser(username, password);
-
-                cacheValue = user != null ? user : throw new Exception();
-
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(900));
-
-                _memoryCache.Set(username, cacheValue, cacheEntryOptions);
-
-                return cacheValue;
-            }
-            else
+            if (_memoryCache.TryGetValue(username, out Duolingo.NET.Models.User cacheValue))
             {
                 return cacheValue;
             }
+
+            var user = await this._client.GetUser(username, password).ConfigureAwait(false);
+            cacheValue = user ?? throw new NullReferenceException("User is null");
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(900));
+
+            _memoryCache.Set(username, cacheValue, cacheEntryOptions);
+
+            return cacheValue;
         }
         catch (Exception)
         {
@@ -85,6 +77,14 @@ public class DuolingoService
         finally
         {
             RequestRunning = false;
+        }
+    }
+
+    private async Task WaitForRunningRequestAsync(string username)
+    {
+        while (RequestRunning)
+        {
+            await Task.Delay(1000).ConfigureAwait(false);
         }
     }
 }
